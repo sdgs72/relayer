@@ -1058,7 +1058,9 @@ func (cc *CosmosProvider) RelayPacketFromSequence(
 	case len(txs) == 0:
 		return nil, nil, fmt.Errorf("no transactions returned with query")
 	case len(txs) > 1:
-		return nil, nil, fmt.Errorf("more than one transaction returned with query")
+		{
+			return nil, nil, fmt.Errorf("more than one transaction returned with query")
+		}
 	}
 
 	rcvPackets, timeoutPackets, err := cc.relayPacketsFromResultTx(ctx, src, dst, int64(dsth), txs[0], dstChanId, dstPortId, dstClientId, srcChanId, srcPortId, srcClientId)

@@ -6,11 +6,15 @@ import (
 	"sync"
 
 	"github.com/cosmos/relayer/v2/relayer/provider"
+	"github.com/cosmos/relayer/v2/relayer/provider/cosmos"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	chantypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 )
 
+// 	chantypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 // RelayMsgs contains the msgs that need to be sent to both a src and dst chain
 // after a given relay round. MaxTxSize and MaxMsgLength are ignored if they are
 // set to zero.
@@ -186,6 +190,32 @@ func (r *RelayMsgs) send(
 			multierr.AppendInto(errors, err)
 		}
 		if success {
+			for _, msg := range msgs {
+				gg := msg.Type()
+				switch gg {
+				case "/ibc.core.channel.v1.MsgRecvPacket":
+					//internalMsg := (cosmos.CosmosMsg()) msg.Msg
+					//if internalMsg.Packet != nil {
+					//
+					//}
+					ff := msg.(cosmos.CosmosMessage)
+					sdkMsg := ff.Msg
+					lel := sdkMsg.(*chantypes.MsgRecvPacket)
+					packetData := lel.Packet.Data
+					toStr := string(packetData)
+					if len(packetData) != 5 {
+
+					}
+					if len(toStr) != 1 {
+
+					}
+					log.Info("!!!!! DXH Successfully sent to: " + s.ChainID + " with data: " + toStr)
+				case chantypes.AttributeKeyAck:
+					continue
+				default:
+					continue
+				}
+			}
 			*successes++
 		}
 	}
