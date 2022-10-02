@@ -177,6 +177,7 @@ func relayUnrelayedPacketsAndAcks(ctx context.Context, log *zap.Logger, src, dst
 	}()
 
 	for {
+		// log.Info("!!!!! DXH GETTING PACKETS..... ")
 		if ok := relayUnrelayedPackets(ctx, log, src, dst, maxTxSize, maxMsgLength, srcChannel.channel); !ok {
 			return
 		}
@@ -198,11 +199,12 @@ func relayUnrelayedPacketsAndAcks(ctx context.Context, log *zap.Logger, src, dst
 // relayUnrelayedPackets returns true if packets were empty or were successfully relayed.
 // Otherwise, it logs the errors and returns false.
 func relayUnrelayedPackets(ctx context.Context, log *zap.Logger, src, dst *Chain, maxTxSize, maxMsgLength uint64, srcChannel *types.IdentifiedChannel) bool {
-	childCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
+	childCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	// Fetch any unrelayed sequences depending on the channel order
 	sp, err := UnrelayedSequences(ctx, src, dst, srcChannel)
+	//log.Info("!!!!! DXH GETTING SEQUENCES..... ")
 	if err != nil {
 		src.log.Warn(
 			"Error retrieving unrelayed sequences",
@@ -246,6 +248,7 @@ func relayUnrelayedPackets(ctx context.Context, log *zap.Logger, src, dst *Chain
 	}
 
 	if err := RelayPackets(childCtx, log, src, dst, sp, maxTxSize, maxMsgLength, srcChannel); err != nil {
+		// log.Info("!!!!! DXH RELAY PACKETS..... ")
 		// If there was a context cancellation or deadline while attempting to relay packets,
 		// log that and indicate failure.
 		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
